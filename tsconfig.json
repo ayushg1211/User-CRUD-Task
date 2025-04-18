@@ -5,6 +5,9 @@
   "references": [
     {
       "path": "./apps/users-app"
+    },
+    {
+      "path": "./libs/crud"
     }
   ]
 }
