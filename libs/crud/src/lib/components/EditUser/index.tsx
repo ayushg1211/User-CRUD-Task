@@ -1,5 +1,6 @@
 import React, { ChangeEvent, ReactNode, useEffect, useState } from 'react';
 import { Button, Input, Modal } from 'antd';
+import { useAllUsers } from '../../context/context';
 
 interface Userid{
     userid:number ;
@@ -26,6 +27,7 @@ const EditUser: React.FC<Userid> = ({userid}) => {
     password:"",
     role:""
   })
+  const {users, setUsers, editUser} = useAllUsers() ;
 
   const showModal = () => {
     setOpen(true);
@@ -33,10 +35,29 @@ const EditUser: React.FC<Userid> = ({userid}) => {
 
   const handleOk = () => {
     setConfirmLoading(true);
-    // setTimeout(() => {
+      let editedUser = {...user, name:editData.name, email:editData.email, role:editData.role, password:editData.password} as DataType ;
+      
+      editUser(editedUser) ;
+      // const storedUsers = localStorage.getItem('users');
+      // let users: DataType[] = [];
+  
+      // if (storedUsers) {
+      //   try {
+      //     users = JSON.parse(storedUsers);
+      //     setEditData
+      //   } catch (error) {
+      //     console.error('Error parsing users from localStorage:', error);
+      //     // Handle the error if needed
+      //   }
+      // }
+
+      // let idx = users.findIndex((item)=> item.id === editedUser?.id) ;
+      // users[idx] = {...editedUser} ;
+
+      // localStorage.setItem("users", JSON.stringify(users)) ;
+      
       setOpen(false);
       setConfirmLoading(false);
-    // }, 2000);
   };
 
   const handleCancel = () => {
@@ -45,6 +66,7 @@ const EditUser: React.FC<Userid> = ({userid}) => {
   };
 
   const handleChange = (e:ChangeEvent<HTMLInputElement>) => {
+    // console.log(e.target.value) ;
     let {name, value} = e.target ;
     setEditData(prev => ({...editData, [name]:value})) ;
   }
@@ -58,7 +80,6 @@ const EditUser: React.FC<Userid> = ({userid}) => {
     if (storedUsers) {
       try {
         users = JSON.parse(storedUsers);
-        setEditData
       } catch (error) {
         console.error('Error parsing users from localStorage:', error);
         // Handle the error if needed
@@ -70,6 +91,8 @@ const EditUser: React.FC<Userid> = ({userid}) => {
     setUser(prev=> theUser);
 
   },[])
+
+  useEffect(()=>{}, [open]) ;
   return (
     <>
       <Button type="primary" onClick={showModal}>

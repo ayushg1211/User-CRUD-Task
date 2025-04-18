@@ -3,6 +3,7 @@ import { Modal, Space, Table, Tag } from 'antd';
 import { AsyncLocalStorage } from 'async_hooks';
 import toast from 'react-hot-toast';
 import EditUser from '../EditUser';
+import { useAllUsers } from '../../context/context';
 
 const { Column } = Table;
 
@@ -19,11 +20,13 @@ interface DataType {
 
 const UserTable: React.FC = () => {
   const [userData, setUserData] = useState<DataType[]>();
+  const {removeUser, users, setUsers} = useAllUsers() ;
 
   useEffect(() => {
     const stored = localStorage.getItem("users");
     if (stored) {
       setUserData(JSON.parse(stored) as DataType[]);
+      setUsers(JSON.parse(stored) as DataType[]) ;
     } else {
       fetchUserData();
     }
@@ -33,6 +36,7 @@ const UserTable: React.FC = () => {
         const res = await fetch('https://api.escuelajs.co/api/v1/users');
         const data = (await res.json()) as DataType[];
         setUserData(data);
+        setUsers(data)
         localStorage.setItem('users', JSON.stringify(data));
       } catch (error) {
         console.error('Failed to fetch users:', error);
@@ -41,44 +45,21 @@ const UserTable: React.FC = () => {
   }, []);
 
   // Show delete confirmation
-  const showDeleteConfirm = (id: number) => {
+  const showDeleteConfirm = (user: DataType) => {
     let confirmation = confirm("Are You Sure");
-
     if(confirmation){
-        handleDelete(id) ;
+        handleDelete(user) ;
     }
-
   };
 
-  const handleDelete = async (id: number) => {
-    console.log(id) ;
-    try{
-        // const res = await fetch(`https://api.escuelajs.co/api/v1/users/${id}`, {
-        //     method: 'DELETE',
-        // });
-      
-        // if (!res.ok) {
-        //     throw new Error('Network response was not ok');
-        // }
-
-        const updatedUsers = userData?.filter(user => user.id !== id) || [];
-
-        // Update state & localStorage
-        setUserData(updatedUsers);
-        localStorage.setItem('users', JSON.stringify(updatedUsers));
-
-
-        toast.success(`User with ID ${id} deleted`);
-      }
-
-    catch(error){
-        console.log("unable to delete", error) ;
-        toast.error("Unable To Delete Account")
-    }
+  const handleDelete = async (user: DataType) => {
+    // console.log(user) ;
+    removeUser(user) ;
+    
   };
 
   return (
-    <Table<DataType> dataSource={userData} rowKey="id">
+    <Table<DataType> dataSource={users} rowKey="id">
       <Column title="ID" dataIndex="id" key="id" />
       <Column title="Name" dataIndex="name" key="id" />
 
@@ -94,10 +75,9 @@ const UserTable: React.FC = () => {
             <EditUser userid={record?.id}/>
             <a 
                       onClick={() => {
-                        showDeleteConfirm(record.id);
+                        showDeleteConfirm(record);
                       }}
                       style={{ color: 'red' }}
-             
             >
                 Delete
             </a>
